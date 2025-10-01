@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Notes App</title>
+</head>
+<body>
+  <h1>Notes App</h1>
+
+  <form id="noteForm">
+    <textarea id="note" rows="6" cols="60" placeholder="Type note here..."></textarea><br>
+    <button type="submit">Save Note</button>
+  </form>
+
+  <h2>Saved Notes</h2>
+  <pre id="notes">Loading...</pre>
+
+<script>
+async function fetchNotes(){
+  try {
+    const res = await fetch('/api/notes');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    document.getElementById('notes').textContent = text || '(no notes)';
+  } catch(e){
+    document.getElementById('notes').textContent = 'Error fetching notes: ' + e;
+  }
+}
+
+document.getElementById('noteForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const note = document.getElementById('note').value;
+  if (!note) return;
+  await fetch('/api/notes', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ note })
+  });
+  document.getElementById('note').value = '';
+  fetchNotes();
+});
+
+fetchNotes();
+</script>
+</body>
+</html>
